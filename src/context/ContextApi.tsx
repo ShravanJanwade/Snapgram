@@ -15,7 +15,7 @@ const ContextProvider = (props) => {
   const delayPara = (index, nextWord) => {
     setTimeout(() => {
       setResultData((prev) => prev + nextWord);
-    }, 75 * index);
+    }, 3 * index);
   };
 
   const newChat = () => {
@@ -37,28 +37,11 @@ const ContextProvider = (props) => {
       response = await run(input);
     }
 
-    let responseArray = response.split("**");
-    let newResponse = "";
-    for (let i = 0; i < responseArray.length; i++) {
-      if (i === 0 || i % 2 !== 1) {
-        newResponse += responseArray[i];
-      } else {
-        newResponse += "<b>" + responseArray[i] + "</b>";
-      }
-    }
-
-    let newResponse2 = newResponse.split("*").join("<br>");
-    let finalResponse = newResponse2.replace(
-      /```([^]+?)```/g,
-      (match, code) => {
-        return `<div class="code-container"><CodeBlock code={\`${code}\`} /></div>`;
-      }
-    );
-
-    let newResponseArray = finalResponse.split(" ");
+    // Split by spaces but preserve newlines and multiple spaces
+    let newResponseArray = response.split(/(\s+)/);
     for (let i = 0; i < newResponseArray.length; i++) {
       const nextWord = newResponseArray[i];
-      delayPara(i, nextWord + " ");
+      delayPara(i, nextWord);
     }
 
     setLoading(false);

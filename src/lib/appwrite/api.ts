@@ -1,6 +1,7 @@
 import { ID, Query } from "appwrite";
 
-import { appwriteConfig, account, databases, storage, avatars } from "./config";
+import { appwriteConfig, account, databases, avatars } from "./config";
+import { supabase, storageBucket } from "../supabase/config";
 import { INewPost, INewUser, IUpdatePost, IUpdateUser } from "@/types";
 
 // ============================================================
@@ -106,6 +107,7 @@ export async function getCurrentUser() {
 }
 
 // ============================== SIGN OUT
+// ============================== SIGN OUT
 export async function signOutAccount() {
   try {
     const session = await account.deleteSession("current");
@@ -113,6 +115,8 @@ export async function signOutAccount() {
     return session;
   } catch (error) {
     console.log(error);
+    // If the session is already invalid (guest), we still want the UI to treat it as a successful logout
+    return { status: "ok" };
   }
 }
 
@@ -167,13 +171,14 @@ export async function createPost(post: INewPost) {
 // ============================== UPLOAD FILE
 export async function uploadFile(file: File) {
   try {
-    const uploadedFile = await storage.createFile(
-      appwriteConfig.storageId,
-      ID.unique(),
-      file
-    );
+    const fileId = ID.unique();
+    const { data, error } = await supabase.storage
+      .from(storageBucket)
+      .upload(fileId, file);
 
-    return uploadedFile;
+    if (error) throw error;
+
+    return { $id: fileId, ...data };
   } catch (error) {
     console.log(error);
   }
@@ -182,18 +187,13 @@ export async function uploadFile(file: File) {
 // ============================== GET FILE URL
 export function getFilePreview(fileId: string) {
   try {
-    const fileUrl = storage.getFilePreview(
-      appwriteConfig.storageId,
-      fileId,
-      2000,
-      2000,
-      "top",
-      100
-    );
+    const { data } = supabase.storage
+      .from(storageBucket)
+      .getPublicUrl(fileId);
 
-    if (!fileUrl) throw Error;
+    if (!data) throw Error;
 
-    return fileUrl;
+    return data.publicUrl;
   } catch (error) {
     console.log(error);
   }
@@ -202,7 +202,11 @@ export function getFilePreview(fileId: string) {
 // ============================== DELETE FILE
 export async function deleteFile(fileId: string) {
   try {
-    await storage.deleteFile(appwriteConfig.storageId, fileId);
+    const { error } = await supabase.storage
+      .from(storageBucket)
+      .remove([fileId]);
+
+    if (error) throw error;
 
     return { status: "ok" };
   } catch (error) {
@@ -375,7 +379,7 @@ export async function getUserPosts(userId?: string) {
   }
 }
 
-export async function getInfinitePosts({pageParam}:{pageParam:number}){
+export async function getInfinitePosts({pageParam}:{pageParam?:string}){
   const queries:any[]=[Query.orderDesc('$updatedAt'),Query.limit(10)]
   if(pageParam){
     queries.push(Query.cursorAfter(pageParam.toString()))

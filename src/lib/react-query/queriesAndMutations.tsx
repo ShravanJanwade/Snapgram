@@ -145,7 +145,7 @@ export const useUpdatePost = () => {
     mutationFn: (post: IUpdatePost) => updatePost(post),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.$id],
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
       });
     },
   });
@@ -174,6 +174,7 @@ export const useGetPosts=()=>{
   return useInfiniteQuery({
     queryKey:[QUERY_KEYS.GET_INFINITE_POSTS],
     queryFn:getInfinitePosts,
+    initialPageParam: undefined,
     getNextPageParam: (lastPage) =>{
       if(lastPage && lastPage.documents.length===0){
         return null;

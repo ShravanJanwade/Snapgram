@@ -2,6 +2,10 @@ import React, { useContext, useRef, ChangeEvent } from "react";
 import "./Main.css";
 import { Context } from "../../context/ContextApi";
 import { assets } from "../../assets/assets";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { CodeBlock } from "../shared/CodeBlock";
+import { Mermaid } from "../shared/Mermaid";
 
 const Main: React.FC = () => {
   const {
@@ -49,7 +53,7 @@ const Main: React.FC = () => {
   return (
     <div className="main" style={{ backgroundColor: "#09090A" }}>
       <div className="nav">
-        <p>Codegram AI</p>
+        <p>Snapgram AI</p>
       </div>
       <div className="main-container">
         {!showResult ? (
@@ -94,10 +98,52 @@ const Main: React.FC = () => {
                   <hr />
                 </div>
               ) : (
-                <p
-                  style={{ color: "white" }}
-                  dangerouslySetInnerHTML={{ __html: resultData }}
-                />
+                <div className="markdown-container">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      code({node, inline, className, children, ...props}) {
+                        const match = /language-(\w+)/.exec(className || '');
+                        const language = match ? match[1] : '';
+                        const textContent = String(children).replace(/\n$/, '');
+
+                        if (!inline && language === 'mermaid') {
+                          return <Mermaid chart={textContent} />;
+                        }
+
+                        if (!inline && match) {
+                          return (
+                            <CodeBlock 
+                              language={language} 
+                              value={textContent} 
+                            />
+                          );
+                        }
+
+                        return (
+                          <code className={className} style={{backgroundColor: '#1e293b', padding: '2px 4px', borderRadius: '4px', fontFamily: 'monospace'}} {...props}>
+                            {children}
+                          </code>
+                        );
+                      },
+                      p: ({node, ...props}) => <p style={{color: 'white', marginBottom: '1rem', lineHeight: '1.6'}} {...props} />,
+                      ul: ({node, ...props}) => <ul style={{color: 'white', listStyleType: 'disc', marginLeft: '1.5rem', marginBottom: '1rem'}} {...props} />,
+                      ol: ({node, ...props}) => <ol style={{color: 'white', listStyleType: 'decimal', marginLeft: '1.5rem', marginBottom: '1rem'}} {...props} />,
+                      li: ({node, ...props}) => <li style={{color: 'white', marginBottom: '0.5rem'}} {...props} />,
+                      h1: ({node, ...props}) => <h1 style={{color: 'white', fontSize: '2em', fontWeight: 'bold', marginBottom: '1rem', marginTop: '1.5rem'}} {...props} />,
+                      h2: ({node, ...props}) => <h2 style={{color: 'white', fontSize: '1.5em', fontWeight: 'bold', marginBottom: '1rem', marginTop: '1.5rem'}} {...props} />,
+                      h3: ({node, ...props}) => <h3 style={{color: 'white', fontSize: '1.17em', fontWeight: 'bold', marginBottom: '1rem', marginTop: '1rem'}} {...props} />,
+                      strong: ({node, ...props}) => <strong style={{fontWeight: 'bold', color: '#e2e8f0'}} {...props} />,
+                      table: ({node, ...props}) => <div style={{overflowX: 'auto', marginBottom: '1rem', border: '1px solid #475569', borderRadius: '8px'}}><table style={{borderCollapse: 'collapse', width: '100%', color: 'white'}} {...props} /></div>,
+                      th: ({node, ...props}) => <th style={{borderBottom: '1px solid #475569', padding: '12px', backgroundColor: '#1e293b', textAlign: 'left', fontWeight: 'bold'}} {...props} />,
+                      td: ({node, ...props}) => <td style={{borderBottom: '1px solid #475569', padding: '12px'}} {...props} />,
+                      div: ({node, ...props}) => <div style={{ marginBottom: '1rem' }} {...props} />,
+                      span: ({node, ...props}) => <span style={{ color: 'white' }} {...props} />,
+                    }}
+                  >
+                    {resultData}
+                  </ReactMarkdown>
+                </div>
               )}
             </div>
           </div>
@@ -132,7 +178,7 @@ const Main: React.FC = () => {
             </div>
           </div>
           <p className="bottom-info">
-            Codegram may display inaccurate info, take it into consideration.
+            Snapgram may display inaccurate info, take it into consideration.
           </p>
         </div>
       </div>

@@ -32,7 +32,7 @@ export function AiDrawer() {
             }}
             onClick={openDrawerRight}
           >
-            Codegram AI
+            Snapgram AI
           </Button>
         </div>
         <Drawer
