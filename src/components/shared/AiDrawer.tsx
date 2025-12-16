@@ -23,6 +23,7 @@ export function AiDrawer() {
     <ContextProvider>
       <React.Fragment>
         <div>
+          {/* @ts-ignore */}
           <Button
             style={{
               backgroundColor: "black",
@@ -35,6 +36,7 @@ export function AiDrawer() {
             Snapgram AI
           </Button>
         </div>
+        {/* @ts-ignore */}
         <Drawer
           placement="right"
           open={openRight}

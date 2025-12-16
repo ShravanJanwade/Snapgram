@@ -1,8 +1,7 @@
-import { createContext, useState } from "react";
+import React, { createContext, useState } from "react";
 import run from "../config/gemini";
-import CodeBlock from "../Components/CodeBlock";
 
-export const Context = createContext();
+export const Context = createContext<any>(undefined);
 
 const ContextProvider = (props) => {
   const [input, setInput] = useState("");

@@ -50,6 +50,8 @@ const PostForm = ({ post, action }: PostFormProps) => {
     if (post && action == "Update") {
       const updatedPost = await updatePost({
         ...values,
+        caption: values.caption || "",
+        file: values.file || [],
         postId: post.$id,
         imageId: post?.imageId,
         imageUrl: post?.imageUrl,
@@ -61,6 +63,8 @@ const PostForm = ({ post, action }: PostFormProps) => {
     }
     const newPost = await createPost({
       ...values,
+      caption: values.caption || "",
+      file: values.file || [],
       userId: user.id,
     });
     if (!newPost) {
